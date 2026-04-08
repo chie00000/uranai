@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="天地五術">
+<meta name="theme-color" content="#0A0A0F">
+<title>天地五術 運勢盤</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&family=Noto+Serif+JP:wght@600;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --bg:#0A0A0F; --surface:#12121A; --card:#1A1A25; --border:#252535;
+  --a1:#7C5CFC; --a2:#FC5C7D; --a3:#56CCF2; --a4:#F7971E; --a5:#43E97B;
+  --text:#E8E8F0; --muted:#6B6B85;
+}
+body {
+  background:var(--bg); color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;
+  min-height:100vh;
+  padding-bottom:max(env(safe-area-inset-bottom,0px),24px);
+}
+.header {
+  background:linear-gradient(135deg,#7C5CFC22,#FC5C7D22);
+  border-bottom:1px solid var(--border);
+  padding:max(env(safe-area-inset-top,0px),32px) 20px 20px;
+  text-align:center;
+}
+.header-eyebrow { font-family:'Cinzel',serif; font-size:10px; color:var(--muted); letter-spacing:.3em; margin-bottom:6px; }
+.header-title { font-family:'Noto Serif JP',serif; font-size:21px; font-weight:700; margin-bottom:4px; }
+.header-birth { font-size:11px; color:var(--muted); }
+.container { max-width:480px; margin:0 auto; padding:0 14px; }
+
+/* DATE */
+.date-box {
+  background:var(--surface); border-radius:14px; border:1px solid var(--border);
+  padding:14px 16px; margin:14px 0;
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+}
+.date-info { flex:1; }
+.date-lbl { font-size:10px; color:var(--muted); margin-bottom:3px; }
+.date-display { font-family:'Noto Serif JP',serif; font-size:17px; font-weight:700; }
+input[type=date] {
+  background:var(--card); border:1px solid var(--border); border-radius:10px;
+  padding:8px 10px; color:var(--text); font-size:13px;
+  font-family:'Noto Sans JP',sans-serif; cursor:pointer;
+}
+
+/* OVERALL */
+.overall {
+  border-radius:20px; padding:22px 18px; margin-bottom:14px; text-align:center;
+  background:linear-gradient(135deg,var(--card),var(--surface));
+  transition:border-color .5s, box-shadow .5s;
+}
+.overall-eyebrow { font-size:10px; color:var(--muted); letter-spacing:.2em; margin-bottom:10px; }
+.ring-wrap { display:flex; justify-content:center; margin-bottom:10px; }
+.overall-kaku { font-family:'Noto Serif JP',serif; font-size:26px; font-weight:700; margin-bottom:8px; }
+.advice {
+  font-size:12px; line-height:1.7; background:var(--card);
+  border-radius:10px; padding:10px 14px; margin-bottom:14px;
+}
+.bars { display:flex; gap:6px; }
+.bar-col { flex:1; text-align:center; }
+.bar-track { height:38px; background:var(--border); border-radius:4px; position:relative; overflow:hidden; margin-bottom:3px; }
+.bar-fill { position:absolute; bottom:0; width:100%; border-radius:4px; transition:height .8s ease; }
+.bar-lbl { font-size:9px; color:var(--muted); }
+.bar-val { font-size:10px; font-weight:700; }
+
+/* SECTION */
+.sec {
+  border-radius:14px; padding:16px; margin-bottom:12px;
+  background:var(--card);
+}
+.sec-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.sec-left { display:flex; align-items:center; gap:8px; }
+.sec-icon { font-size:18px; }
+.sec-name { font-family:'Noto Serif JP',serif; font-weight:700; font-size:14px; }
+.info-row { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:7px; }
+.info-lbl { color:var(--muted); font-size:11px; padding-top:1px; }
+.info-right { text-align:right; }
+.info-val { font-size:12px; font-weight:600; }
+.info-sub { font-size:10px; color:var(--muted); }
+.sec-note {
+  margin-top:8px; padding:8px 12px; background:var(--surface);
+  border-radius:8px; font-size:11px; color:var(--muted); line-height:1.6;
+}
+.pillbox { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+.pill {
+  display:inline-block; padding:2px 10px; border-radius:20px;
+  font-size:11px; font-weight:600; letter-spacing:.05em;
+}
+.shichu-cols { display:flex; gap:5px; margin-bottom:10px; }
+.shichu-col {
+  flex:1; text-align:center; background:var(--surface);
+  border-radius:8px; padding:8px 4px;
+}
+.shichu-col-lbl { font-size:9px; color:var(--muted); margin-bottom:3px; }
+.shichu-stem { font-family:'Noto Serif JP',serif; font-size:18px; font-weight:700; }
+.shichu-branch { font-family:'Noto Serif JP',serif; font-size:16px; }
+.maya-boxes { display:flex; gap:10px; margin-bottom:10px; }
+.maya-box {
+  flex:1; background:var(--surface); border-radius:8px;
+  padding:10px; text-align:center;
+}
+.maya-box-lbl { font-size:9px; color:var(--muted); margin-bottom:4px; }
+.maya-kin { font-size:22px; font-weight:700; }
+.maya-sign { font-size:11px; }
+.footer { text-align:center; padding:14px 0; color:var(--muted); font-size:10px; line-height:1.6; }
+.loading { text-align:center; padding:60px 0; color:var(--muted); }
+.loading-icon { font-size:30px; margin-bottom:12px; animation:spin 3s linear infinite; }
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">CELESTIAL COMPASS</div>
+  <div class="header-title">天地五術 運勢盤</div>
+  <div class="header-birth">1980年4月26日 23:11生 ／ 岐阜</div>
+</div>
+
+<div class="container">
+  <div class="date-box">
+    <div class="date-info">
+      <div class="date-lbl">観測日</div>
+      <div class="date-display" id="dateDisplay">—</div>
+    </div>
+    <input type="date" id="datePicker">
+  </div>
+  <div id="output"><div class="loading"><div class="loading-icon">☯</div><div>読み取り中…</div></div></div>
+</div>
+
+<script>
+// ══════════════════════════════
+// CONSTANTS
+// ══════════════════════════════
+const BIRTH = { year:1980, month:4, day:26, hour:23, minute:11 };
+
+const KYUSEI_NAMES = ["","一白水星","二黒土星","三碧木星","四緑木星","五黄土星","六白金星","七赤金星","八白土星","九紫火星"];
+const KYUSEI_EL    = ["","水","土","木","木","土","金","金","土","火"];
+const TEN_STEMS    = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+const TWELVE_BR    = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+const STEM_EL      = ["木","木","火","火","土","土","金","金","水","水"];
+const BR_EL        = ["水","土","木","木","土","火","火","土","金","金","土","水"];
+
+const TZOLKIN_SIGNS = ["イミシュ","イク","アクバル","カン","チクチャン","キミ","マニク","ラマット","ムルク","オク","チュエン","エブ","ベン","イシュ","メン","キブ","カバン","エツナブ","カワク","アハウ"];
+const TZOLKIN_MEAN  = ["始まりの力・創造","風・変化・コミュニケーション","夢・内省・神秘","種・成熟・豊穣","蛇・生命力・情熱","死と再生・変容","手・癒し・達成","金星・豊かさ・光","水・感情・浄化","犬・仲間・忠誠","猿・芸術・遊び","道・奉仕・謙虚","葦・知恵・方向性","jaguar・魔法・内なる力","鷹・視野・洞察","蜜蜂・記憶・許し","地球・同調・進化","鏡・真実・鋭敏","嵐・変革・クリエイティビティ","太陽・光・悟り"];
+const HAAB_MONTHS   = ["ポプ","ウォ","シップ","ソッツ","セク","シュル","ヤシュキン","モル","チェン","ヤシュ","サック","ケフ","マック","カンキン","ムワン","パックス","カヤブ","クムク","ウァヤブ"];
+
+const ZODIAC = [
+  {name:"牡羊座",el:"火",sm:3,sd:21,em:4,ed:19},
+  {name:"牡牛座",el:"土",sm:4,sd:20,em:5,ed:20},
+  {name:"双子座",el:"風",sm:5,sd:21,em:6,ed:20},
+  {name:"蟹座",  el:"水",sm:6,sd:21,em:7,ed:22},
+  {name:"獅子座",el:"火",sm:7,sd:23,em:8,ed:22},
+  {name:"乙女座",el:"土",sm:8,sd:23,em:9,ed:22},
+  {name:"天秤座",el:"風",sm:9,sd:23,em:10,ed:22},
+  {name:"蠍座",  el:"水",sm:10,sd:23,em:11,ed:21},
+  {name:"射手座",el:"火",sm:11,sd:22,em:12,ed:21},
+  {name:"山羊座",el:"土",sm:12,sd:22,em:1,ed:19},
+  {name:"水瓶座",el:"風",sm:1,sd:20,em:2,ed:18},
+  {name:"魚座",  el:"水",sm:2,sd:19,em:3,ed:20},
+];
+const ASC_SIGNS = ["牡羊座","牡牛座","双子座","蟹座","獅子座","乙女座","天秤座","蠍座","射手座","山羊座","水瓶座","魚座"];
+const ASPECTS = [
+  {name:"コンジャンクション",type:"強調",desc:"エネルギーが一点集中"},
+  {name:"セクスタイル",type:"調和",desc:"チャンスと協力の流れ"},
+  {name:"スクエア",type:"緊張",desc:"課題と成長の機会"},
+  {name:"トライン",type:"調和",desc:"流れるような好運"},
+  {name:"オポジション",type:"対立",desc:"バランスと統合を求める"},
+];
+const TWELVE_FORTUNES = ["長生","沐浴","冠帯","建禄","帝旺","衰","病","死","墓","絶","胎","養"];
+const FORTUNE_SCORES  = [80,30,70,90,100,50,20,10,40,15,60,65];
+const SANMEI_STARS = ["天将星","天禄星","天馳星","天胡星","天極星","天恍星","天南星","天将星","天禄星","天馳星"];
+const SANMEI_YOJIN = ["龍高星","石門星","牽牛星","鳳閣星","調舒星","禄存星","司禄星","車騎星","牽牛星","天貴星","龍高星","石門星"];
+const ENERGY_NAMES  = ["拡大","内省","前進","調整","絶頂","休息","展開","蓄積","開花","転換"];
+const ENERGY_SCORES = [85,40,75,60,90,30,70,55,80,45];
+const KYUSEI_GOOD = {1:[6,7],2:[8,9],3:[1,4],4:[3,1],5:[2,8],6:[1,7],7:[6,1],8:[5,9],9:[2,5]};
+const KYUSEI_BAD  = {1:[2,5,8],2:[3,4],3:[5,2],4:[5,2],5:[4,3,6,7,1,9],6:[2,5,8],7:[2,5,8],8:[3,4],9:[6,7]};
+
+// ══════════════════════════════
+// CALC HELPERS
+// ══════════════════════════════
+function kyuseiHonmei(y){ const r=(11-((y-1)%9))%9; return r===0?9:r; }
+function kyuseiDaily(d){
+  const base=new Date(1912,0,1);
+  const diff=Math.floor((d-base)/86400000);
+  const r=((diff%9)+9)%9;
+  return [9,8,7,6,5,4,3,2,1][r];
+}
+function stemBranch(y){ return {stem:TEN_STEMS[(y-4)%10], branch:TWELVE_BR[(y-4)%12]}; }
+function monthSB(y,m){
+  const bi=[2,3,4,5,6,7,8,9,10,11,0,1][m-1];
+  const sb=[2,4,6,8,0][(y-4)%10%5];
+  return {stem:TEN_STEMS[(sb+(m-1))%10], branch:TWELVE_BR[bi]};
+}
+function daySB(d){
+  const base=new Date(1900,0,1);
+  const diff=Math.floor((d-base)/86400000);
+  return {stem:TEN_STEMS[((diff%10)+10)%10], branch:TWELVE_BR[((diff%12)+12)%12]};
+}
+function hourSB(h){ return {stem:"？", branch:TWELVE_BR[Math.floor((h+1)/2)%12]}; }
+function dailyFortune(dStem,bStem){
+  const si=TEN_STEMS.indexOf(dStem), bi=TEN_STEMS.indexOf(bStem);
+  const fi=Math.floor(((si-bi+10)%10)*1.2)%12;
+  return {name:TWELVE_FORTUNES[fi], score:FORTUNE_SCORES[fi]};
+}
+function mayaDate(d){
+  const corr=584283;
+  const jdn=Math.floor((d-new Date(-4713,10,24))/86400000);
+  const tz=(jdn-corr+4+260*1000)%260;
+  const tone=(tz%13)+1, sign=tz%20;
+  const haab=(jdn-corr+348+365*1000)%365;
+  return {kin:tz+1, tone, sign, signName:TZOLKIN_SIGNS[sign], meaning:TZOLKIN_MEAN[sign],
+    haabMonth:haab<360?HAAB_MONTHS[Math.floor(haab/20)]:"ウァヤブ", haabDay:haab%20};
+}
+function sunSign(m,d){
+  for(const z of ZODIAC){
+    if(z.sm<=z.em){if((m===z.sm&&d>=z.sd)||(m===z.em&&d<=z.ed)||(m>z.sm&&m<z.em))return z;}
+    else{if((m===z.sm&&d>=z.sd)||m>z.sm||(m===z.em&&d<=z.ed)||m<z.em)return z;}
+  }
+  return ZODIAC[0];
+}
+function moonSign(d){
+  const base=new Date(2000,0,1);
+  const days=(d-base)/86400000;
+  const idx=Math.floor(((days%27.32)+27.32)%27.32/(27.32/12))%12;
+  return ZODIAC[idx];
+}
+function ascendant(m,d,h,min){
+  const lst=(h+min/60+(136.7-135)/15)%24;
+  return ASC_SIGNS[Math.floor(lst/2)%12];
+}
+
+// ══════════════════════════════
+// COMPUTE
+// ══════════════════════════════
+function compute(td){
+  const honmei=kyuseiHonmei(BIRTH.year);
+  const dk=kyuseiDaily(td);
+  const good=(KYUSEI_GOOD[honmei]||[]).includes(dk);
+  const bad=(KYUSEI_BAD[honmei]||[]).includes(dk);
+  const kyuseiScore=good?85:bad?30:60;
+
+  const bsb=stemBranch(BIRTH.year);
+  const dsb=daySB(td);
+  const fort=dailyFortune(dsb.stem,bsb.stem);
+
+  const bMaya=mayaDate(new Date(1980,3,26));
+  const tMaya=mayaDate(td);
+  const mayaScore=(bMaya.tone===tMaya.tone||bMaya.sign===tMaya.sign)?90:Math.abs(bMaya.kin-tMaya.kin)%13===0?75:55;
+
+  const bSign=sunSign(BIRTH.month,BIRTH.day);
+  const tSun=sunSign(td.getMonth()+1,td.getDate());
+  const mSign=moonSign(td);
+  const aspect=ASPECTS[Math.floor((td-new Date(td.getFullYear(),0,1))/86400000)%ASPECTS.length];
+  const elMatch=bSign.el===tSun.el?85:bSign.el===mSign.el?75:55;
+  const aBonus=aspect.type==="調和"?15:aspect.type==="強調"?10:aspect.type==="緊張"?-10:0;
+  const horoScore=Math.min(100,elMatch+aBonus);
+
+  const dayIdx=Math.floor((td-new Date(td.getFullYear(),0,1))/86400000)%10;
+  const sanmeiScore=ENERGY_SCORES[dayIdx];
+  const sanmeiEnergy=ENERGY_NAMES[dayIdx];
+  const sanmeiStar=SANMEI_STARS[(BIRTH.year-4)%10];
+  const sanmeiYojin=SANMEI_YOJIN[(BIRTH.year-4)%12];
+
+  const overall=Math.round(kyuseiScore*.2+fort.score*.25+mayaScore*.2+horoScore*.2+sanmeiScore*.15);
+  return {
+    kyusei:{score:kyuseiScore,honmei,dk,good,bad},
+    shichu:{score:fort.score,fort,dsb,bsb,msb:monthSB(BIRTH.year,BIRTH.month),hsb:hourSB(BIRTH.hour)},
+    maya:{score:mayaScore,bMaya,tMaya},
+    horo:{score:horoScore,bSign,tSun,mSign,aspect,asc:ascendant(BIRTH.month,BIRTH.day,BIRTH.hour,BIRTH.minute)},
+    sanmei:{score:sanmeiScore,energy:sanmeiEnergy,star:sanmeiStar,yojin:sanmeiYojin},
+    overall
+  };
+}
+
+function overallMsg(s){
+  if(s>=85)return{label:"大吉",color:"#FFD700",advice:"絶好調の日。大きな決断や新しい挑戦に最適。積極的に動いて。"};
+  if(s>=70)return{label:"吉",  color:"#4CAF50",advice:"流れが良い日。計画を前進させ、人との縁を大切に。"};
+  if(s>=55)return{label:"中吉",color:"#2196F3",advice:"安定した日。着実に進めることで成果が出る。焦らず丁寧に。"};
+  if(s>=40)return{label:"小吉",color:"#FF9800",advice:"エネルギーをためる日。無理せず、内省と準備に使うのが吉。"};
+  return     {label:"注意",color:"#F44336",advice:"慎重さが必要な日。大きな決断は避け、守りを固めて。"};
+}
+
+// ══════════════════════════════
+// RENDER
+// ══════════════════════════════
+function ring(score,color,size){
+  const r=(size-12)/2, circ=2*Math.PI*r, dash=(score/100)*circ;
+  return `<svg width="${size}" height="${size}" style="transform:rotate(-90deg)">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#252535" stroke-width="6"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="6"
+      stroke-dasharray="${dash} ${circ}" stroke-linecap="round"/>
+    <text x="${size/2}" y="${size/2}" text-anchor="middle" dominant-baseline="middle"
+      fill="${color}" font-size="${size*.22}" font-weight="700"
+      style="transform:rotate(90deg);transform-origin:${size/2}px ${size/2}px">${score}</text>
+  </svg>`;
+}
+
+function pill(text,color){
+  return `<span class="pill" style="background:${color}22;border:1px solid ${color}55;color:${color}">${text}</span>`;
+}
+
+function infoRow(lbl,val,sub=''){
+  return `<div class="info-row">
+    <span class="info-lbl">${lbl}</span>
+    <div class="info-right"><div class="info-val">${val}</div>${sub?`<div class="info-sub">${sub}</div>`:''}</div>
+  </div>`;
+}
+
+function secCard(title,icon,color,score,inner){
+  return `<div class="sec" style="border:1px solid ${color}33;box-shadow:0 0 18px ${color}11">
+    <div class="sec-head">
+      <div class="sec-left">
+        <span class="sec-icon">${icon}</span>
+        <span class="sec-name">${title}</span>
+      </div>
+      ${ring(score,color,54)}
+    </div>
+    ${inner}
+  </div>`;
+}
+
+function render(d){
+  const data=compute(d);
+  const om=overallMsg(data.overall);
+  const COLS={a1:"#7C5CFC",a2:"#FC5C7D",a3:"#56CCF2",a4:"#F7971E",a5:"#43E97B"};
+
+  // OVERALL
+  const barItems=[
+    {lbl:"九星",s:data.kyusei.score,c:COLS.a1},
+    {lbl:"四柱",s:data.shichu.score,c:COLS.a2},
+    {lbl:"マヤ",s:data.maya.score,  c:COLS.a3},
+    {lbl:"星術",s:data.horo.score,  c:COLS.a4},
+    {lbl:"算命",s:data.sanmei.score,c:COLS.a5},
+  ];
+  const bars=barItems.map(b=>`<div class="bar-col">
+    <div class="bar-track"><div class="bar-fill" style="height:${b.s}%;background:${b.c}88"></div></div>
+    <div class="bar-lbl">${b.lbl}</div>
+    <div class="bar-val" style="color:${b.c}">${b.s}</div>
+  </div>`).join('');
+
+  const overallHTML=`<div class="overall" style="border:2px solid ${om.color}44;box-shadow:0 0 40px ${om.color}18">
+    <div class="overall-eyebrow">総合運</div>
+    <div class="ring-wrap">${ring(data.overall,om.color,100)}</div>
+    <div class="overall-kaku" style="color:${om.color}">${om.label}</div>
+    <div class="advice">${om.advice}</div>
+    <div class="bars">${bars}</div>
+  </div>`;
+
+  // 九星
+  const kyuseiRel=data.kyusei.good?"▲ 相生（吉）":data.kyusei.bad?"▽ 相剋（要注意）":"― 中吉";
+  const kyuseiNote=data.kyusei.score>=70?"今日は九星の流れがあなたに味方。北か東への移動が吉。":data.kyusei.score<=40?"静守の日。南西方向への大きな動きは避けて。":"中立的なエネルギー。日常の流れに逆らわず進んで。";
+  const k=secCard("九星気学","☯",COLS.a1,data.kyusei.score,`
+    ${infoRow("本命星",`${data.kyusei.honmei} ${KYUSEI_NAMES[data.kyusei.honmei]}`,`元素：${KYUSEI_EL[data.kyusei.honmei]}`)}
+    ${infoRow("今日の日盤",`${data.kyusei.dk} ${KYUSEI_NAMES[data.kyusei.dk]}`)}
+    ${infoRow("相性",kyuseiRel)}
+    <div class="sec-note">${kyuseiNote}</div>
+  `);
+
+  // 四柱
+  const cols=[
+    {lbl:"年柱",...data.shichu.bsb},
+    {lbl:"月柱",...data.shichu.msb},
+    {lbl:"日柱",...daySB(new Date(1980,3,26))},
+    {lbl:"時柱",...data.shichu.hsb},
+  ];
+  const shichuCols=cols.map(c=>`<div class="shichu-col">
+    <div class="shichu-col-lbl">${c.lbl}</div>
+    <div class="shichu-stem" style="color:${COLS.a2}">${c.stem}</div>
+    <div class="shichu-branch">${c.branch}</div>
+  </div>`).join('');
+  const shichuNote=data.shichu.score>=80?`「${data.shichu.fort.name}」の日。命式の木の気が活発。創造と前進の好機。`:data.shichu.score<=30?`「${data.shichu.fort.name}」の日。エネルギーを外に出さず内なる充電を。`:`「${data.shichu.fort.name}」の日。バランスを保ちながら着実に積み重ねて。`;
+  const s=secCard("四柱推命","🀄",COLS.a2,data.shichu.score,`
+    <div class="shichu-cols">${shichuCols}</div>
+    ${infoRow("今日の干支",`${data.shichu.dsb.stem}${data.shichu.dsb.branch}`)}
+    ${infoRow("十二運",data.shichu.fort.name)}
+    <div class="sec-note">${shichuNote}</div>
+  `);
+
+  // マヤ
+  const mayaNote=data.maya.score>=80?"誕生KINと今日のKINが共鳴。宇宙のリズムがあなたの波長と合っている日。":data.maya.score>=60?"今日の紋章のエネルギーを意識して行動すると流れに乗れる。":"異なる周波数の日。今日の紋章から学ぶ視点で過ごして。";
+  const m=secCard("マヤ暦","🌀",COLS.a3,data.maya.score,`
+    <div class="maya-boxes">
+      <div class="maya-box">
+        <div class="maya-box-lbl">誕生KIN</div>
+        <div class="maya-kin" style="color:${COLS.a3}">${data.maya.bMaya.kin}</div>
+        <div class="maya-sign">${data.maya.bMaya.tone} ${data.maya.bMaya.signName}</div>
+      </div>
+      <div class="maya-box">
+        <div class="maya-box-lbl">今日のKIN</div>
+        <div class="maya-kin" style="color:${COLS.a3}">${data.maya.tMaya.kin}</div>
+        <div class="maya-sign">${data.maya.tMaya.tone} ${data.maya.tMaya.signName}</div>
+      </div>
+    </div>
+    ${infoRow("今日の紋章の意味",data.maya.tMaya.meaning)}
+    ${infoRow("ハアブ暦",`${data.maya.tMaya.haabMonth} ${data.maya.tMaya.haabDay}`)}
+    <div class="sec-note">${mayaNote}</div>
+  `);
+
+  // ホロスコープ
+  const horoNote=data.horo.score>=80?`太陽が${data.horo.tSun.name}を通過中。牡牛座の土の気と調和し、安定の中に豊かさが流れ込む。`:data.horo.score>=55?`${data.horo.aspect.name}のエネルギーが働いている。${data.horo.aspect.desc}を意識して。`:"今日は天体の緊張角。感情と理性のバランスを取ることで成長できる日。";
+  const h=secCard("西洋占星術","♃",COLS.a4,data.horo.score,`
+    <div class="pillbox">
+      ${pill(`☉ ${data.horo.bSign.name}`,COLS.a4)}
+      ${pill(`ASC ${data.horo.asc}`,COLS.a4)}
+      ${pill(`月 ${data.horo.mSign.name}`,COLS.a3)}
+    </div>
+    ${infoRow("太陽トランジット",`${data.horo.tSun.name}（${data.horo.tSun.el}）`)}
+    ${infoRow("本日のアスペクト",data.horo.aspect.name,`${data.horo.aspect.type}・${data.horo.aspect.desc}`)}
+    ${infoRow("エレメント",data.horo.bSign.el===data.horo.tSun.el?"同元素・共鳴":"異元素・刺激")}
+    <div class="sec-note">${horoNote}</div>
+  `);
+
+  // 算命学
+  const sanNote=data.sanmei.score>=80?`今日は「${data.sanmei.energy}」の位相。陽のエネルギーが高まり、社会的な活躍の機会が開く。`:data.sanmei.score>=55?`「${data.sanmei.energy}」の流れ。内なる本質を表現することで力が増す。`:`「${data.sanmei.energy}」の時期。焦らず、天命の方向性に委ねて。`;
+  const an=secCard("算命学","☵",COLS.a5,data.sanmei.score,`
+    ${infoRow("主星",data.sanmei.star,`守護元素：${STEM_EL[(BIRTH.year-4)%10]}`)}
+    ${infoRow("陽占守護神",data.sanmei.yojin)}
+    ${infoRow("今日のエネルギー位相",`${data.sanmei.energy}（${data.sanmei.score}%）`)}
+    <div class="sec-note">${sanNote}</div>
+  `);
+
+  document.getElementById('output').innerHTML=overallHTML+k+s+m+h+an+`<div class="footer">統計学的バイオリズム観測ツール<br>各スコアは複数体系の参照点として活用ください</div>`;
+}
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+const picker=document.getElementById('datePicker');
+const WEEKDAYS=["日","月","火","水","木","金","土"];
+
+function update(){
+  const d=picker.value?new Date(picker.value+'T12:00:00'):new Date();
+  const ds=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${WEEKDAYS[d.getDay()]}）`;
+  document.getElementById('dateDisplay').textContent=ds;
+  render(d);
+}
+
+const today=new Date();
+const pad=n=>String(n).padStart(2,'0');
+picker.value=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+picker.addEventListener('change',update);
+update();
+</script>
+</body>
+</html>
