@@ -138,6 +138,55 @@ input[type=date] {
 // ══════════════════════════════
 const BIRTH = { year:1980, month:4, day:26, hour:23, minute:11 };
 
+// ── 確定済み命式データ（実測値でハードコード）──
+const HONMEI_FIXED = 2; // 二黒土星
+
+// 四柱推命 命式（確定値）
+const SHICHU_FIXED = {
+  nen:  { stem:"庚", branch:"申" }, // 年柱
+  tsuki:{ stem:"庚", branch:"辰" }, // 月柱
+  hi:   { stem:"己", branch:"巳" }, // 日柱
+  toki: { stem:"戊", branch:"子" }, // 時柱
+};
+
+// 算命学 星（確定値）
+const SANMEI_FIXED = {
+  main:  "調舒星",   // 日干の主星
+  yojin: "玉堂星",   // 守護神
+  stars: {           // 命式の星一覧
+    nen:  { top:"天悦星", mid:"石門星", bot:["石門星","司禄星"] },
+    tsuki:{ top:"調舒星", mid:"調舒星", bot:["車騎星","禄存星"] },
+    hi:   { top:"天将星", mid:"調舒星", bot:["石門星","禄存星"] },
+  }
+};
+
+// マヤ暦 誕生KIN（確定値）
+const MAYA_BIRTH_FIXED = {
+  kin: 248,
+  tone: 1,
+  signName: "黄色い星（LAMAT）",
+  meaning: "金星・豊かさ・光・美・調和",
+  latent: "黄色い星", // 潜在意識
+};
+
+// 西洋占星術 出生図（確定値）
+const HORO_FIXED = {
+  sun:  { name:"牡牛座", el:"土", deg:"29°06'" },
+  moon: { name:"乙女座", el:"土", deg:"25°35'" },
+  asc:  { name:"山羊座", deg:"5°58'" },
+  mc:   { name:"天秤座", deg:"26°17'" },
+  planets: {
+    mercury: { name:"水星", sign:"牡牛座",  deg:"6°19'" },
+    venus:   { name:"金星", sign:"双子座",  deg:"15°20'" },
+    mars:    { name:"火星", sign:"獅子座",  deg:"0°28'" },
+    jupiter: { name:"木星", sign:"獅子座",  deg:"0°14'" },
+    saturn:  { name:"土星", sign:"乙女座",  deg:"20°45'R" },
+    uranus:  { name:"天王星",sign:"射手座", deg:"24°16'R" },
+    neptune: { name:"海王星",sign:"射手座", deg:"22°23'R" },
+    pluto:   { name:"冥王星",sign:"天秤座", deg:"19°56'R" },
+  }
+};
+
 const KYUSEI_NAMES = ["","一白水星","二黒土星","三碧木星","四緑木星","五黄土星","六白金星","七赤金星","八白土星","九紫火星"];
 const KYUSEI_EL    = ["","水","土","木","木","土","金","金","土","火"];
 const TEN_STEMS    = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
@@ -146,7 +195,7 @@ const STEM_EL      = ["木","木","火","火","土","土","金","金","水","水
 const BR_EL        = ["水","土","木","木","土","火","火","土","金","金","土","水"];
 
 const TZOLKIN_SIGNS = ["イミシュ","イク","アクバル","カン","チクチャン","キミ","マニク","ラマット","ムルク","オク","チュエン","エブ","ベン","イシュ","メン","キブ","カバン","エツナブ","カワク","アハウ"];
-const TZOLKIN_MEAN  = ["始まりの力・創造","風・変化・コミュニケーション","夢・内省・神秘","種・成熟・豊穣","蛇・生命力・情熱","死と再生・変容","手・癒し・達成","金星・豊かさ・光","水・感情・浄化","犬・仲間・忠誠","猿・芸術・遊び","道・奉仕・謙虚","葦・知恵・方向性","jaguar・魔法・内なる力","鷹・視野・洞察","蜜蜂・記憶・許し","地球・同調・進化","鏡・真実・鋭敏","嵐・変革・クリエイティビティ","太陽・光・悟り"];
+const TZOLKIN_MEAN  = ["始まりの力・創造","風・変化・コミュニケーション","夢・内省・神秘","種・成熟・豊穣","蛇・生命力・情熱","死と再生・変容","手・癒し・達成","金星・豊かさ・光・美・調和","水・感情・浄化","犬・仲間・忠誠","猿・芸術・遊び","道・奉仕・謙虚","葦・知恵・方向性","jaguar・魔法・内なる力","鷹・視野・洞察","蜜蜂・記憶・許し","地球・同調・進化","鏡・真実・鋭敏","嵐・変革・クリエイティビティ","太陽・光・悟り"];
 const HAAB_MONTHS   = ["ポプ","ウォ","シップ","ソッツ","セク","シュル","ヤシュキン","モル","チェン","ヤシュ","サック","ケフ","マック","カンキン","ムワン","パックス","カヤブ","クムク","ウァヤブ"];
 
 const ZODIAC = [
@@ -183,29 +232,16 @@ const KYUSEI_BAD  = {1:[2,5,8],2:[3,4],3:[5,2],4:[5,2],5:[4,3,6,7,1,9],6:[2,5,8]
 // ══════════════════════════════
 // CALC HELPERS
 // ══════════════════════════════
-function kyuseiHonmei(y){ const r=(11-((y-1)%9))%9; return r===0?9:r; }
 function kyuseiDaily(d){
   const base=new Date(1912,0,1);
   const diff=Math.floor((d-base)/86400000);
   const r=((diff%9)+9)%9;
   return [9,8,7,6,5,4,3,2,1][r];
 }
-function stemBranch(y){ return {stem:TEN_STEMS[(y-4)%10], branch:TWELVE_BR[(y-4)%12]}; }
-function monthSB(y,m){
-  const bi=[2,3,4,5,6,7,8,9,10,11,0,1][m-1];
-  const sb=[2,4,6,8,0][(y-4)%10%5];
-  return {stem:TEN_STEMS[(sb+(m-1))%10], branch:TWELVE_BR[bi]};
-}
 function daySB(d){
   const base=new Date(1900,0,1);
   const diff=Math.floor((d-base)/86400000);
   return {stem:TEN_STEMS[((diff%10)+10)%10], branch:TWELVE_BR[((diff%12)+12)%12]};
-}
-function hourSB(h){ return {stem:"？", branch:TWELVE_BR[Math.floor((h+1)/2)%12]}; }
-function dailyFortune(dStem,bStem){
-  const si=TEN_STEMS.indexOf(dStem), bi=TEN_STEMS.indexOf(bStem);
-  const fi=Math.floor(((si-bi+10)%10)*1.2)%12;
-  return {name:TWELVE_FORTUNES[fi], score:FORTUNE_SCORES[fi]};
 }
 function mayaDate(d){
   const corr=584283;
@@ -217,62 +253,88 @@ function mayaDate(d){
     haabMonth:haab<360?HAAB_MONTHS[Math.floor(haab/20)]:"ウァヤブ", haabDay:haab%20};
 }
 function sunSign(m,d){
-  for(const z of ZODIAC){
+  const ZODIAC2=[
+    {name:"牡羊座",el:"火",sm:3,sd:21,em:4,ed:19},
+    {name:"牡牛座",el:"土",sm:4,sd:20,em:5,ed:20},
+    {name:"双子座",el:"風",sm:5,sd:21,em:6,ed:20},
+    {name:"蟹座",  el:"水",sm:6,sd:21,em:7,ed:22},
+    {name:"獅子座",el:"火",sm:7,sd:23,em:8,ed:22},
+    {name:"乙女座",el:"土",sm:8,sd:23,em:9,ed:22},
+    {name:"天秤座",el:"風",sm:9,sd:23,em:10,ed:22},
+    {name:"蠍座",  el:"水",sm:10,sd:23,em:11,ed:21},
+    {name:"射手座",el:"火",sm:11,sd:22,em:12,ed:21},
+    {name:"山羊座",el:"土",sm:12,sd:22,em:1,ed:19},
+    {name:"水瓶座",el:"風",sm:1,sd:20,em:2,ed:18},
+    {name:"魚座",  el:"水",sm:2,sd:19,em:3,ed:20},
+  ];
+  for(const z of ZODIAC2){
     if(z.sm<=z.em){if((m===z.sm&&d>=z.sd)||(m===z.em&&d<=z.ed)||(m>z.sm&&m<z.em))return z;}
     else{if((m===z.sm&&d>=z.sd)||m>z.sm||(m===z.em&&d<=z.ed)||m<z.em)return z;}
   }
-  return ZODIAC[0];
+  return ZODIAC2[0];
 }
-function moonSign(d){
-  const base=new Date(2000,0,1);
-  const days=(d-base)/86400000;
-  const idx=Math.floor(((days%27.32)+27.32)%27.32/(27.32/12))%12;
-  return ZODIAC[idx];
-}
-function ascendant(m,d,h,min){
-  const lst=(h+min/60+(136.7-135)/15)%24;
-  return ASC_SIGNS[Math.floor(lst/2)%12];
+const ASPECTS = [
+  {name:"コンジャンクション",type:"強調",desc:"エネルギーが一点集中"},
+  {name:"セクスタイル",type:"調和",desc:"チャンスと協力の流れ"},
+  {name:"スクエア",type:"緊張",desc:"課題と成長の機会"},
+  {name:"トライン",type:"調和",desc:"流れるような好運"},
+  {name:"オポジション",type:"対立",desc:"バランスと統合を求める"},
+];
+const TWELVE_FORTUNES = ["長生","沐浴","冠帯","建禄","帝旺","衰","病","死","墓","絶","胎","養"];
+const FORTUNE_SCORES  = [80,30,70,90,100,50,20,10,40,15,60,65];
+
+function dailyFortune(dStem,bStem){
+  const TEN_STEMS2=["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+  const si=TEN_STEMS2.indexOf(dStem), bi=TEN_STEMS2.indexOf(bStem);
+  const fi=Math.floor(((si-bi+10)%10)*1.2)%12;
+  return {name:TWELVE_FORTUNES[fi], score:FORTUNE_SCORES[fi]};
 }
 
 // ══════════════════════════════
 // COMPUTE
 // ══════════════════════════════
 function compute(td){
-  const honmei=kyuseiHonmei(BIRTH.year);
-  const dk=kyuseiDaily(td);
+  // 九星（本命星は確定値、日盤は動的計算）
+  const honmei = HONMEI_FIXED; // 二黒土星
+  const dk = kyuseiDaily(td);
   const good=(KYUSEI_GOOD[honmei]||[]).includes(dk);
   const bad=(KYUSEI_BAD[honmei]||[]).includes(dk);
   const kyuseiScore=good?85:bad?30:60;
 
-  const bsb=stemBranch(BIRTH.year);
+  // 四柱推命（命式は確定値、今日の干支は動的）
   const dsb=daySB(td);
-  const fort=dailyFortune(dsb.stem,bsb.stem);
+  const fort=dailyFortune(dsb.stem, SHICHU_FIXED.hi.stem); // 日干「己」を基準
+  const shichuScore=fort.score;
 
-  const bMaya=mayaDate(new Date(1980,3,26));
+  // マヤ暦（誕生KINは確定値、今日は動的計算）
   const tMaya=mayaDate(td);
-  const mayaScore=(bMaya.tone===tMaya.tone||bMaya.sign===tMaya.sign)?90:Math.abs(bMaya.kin-tMaya.kin)%13===0?75:55;
+  // 誕生KIN248（音1、黄色い星）との共鳴判定
+  const kinDiff = Math.abs(MAYA_BIRTH_FIXED.kin - tMaya.kin);
+  const mayaScore = (tMaya.tone===MAYA_BIRTH_FIXED.tone) ? 90
+    : (tMaya.signName==="ラマット") ? 88  // 同じ黄色い星
+    : (kinDiff%13===0) ? 75
+    : (kinDiff%20===0) ? 70 : 55;
 
-  const bSign=sunSign(BIRTH.month,BIRTH.day);
+  // 西洋占星術（出生図は確定値、トランジット太陽は動的）
   const tSun=sunSign(td.getMonth()+1,td.getDate());
-  const mSign=moonSign(td);
   const aspect=ASPECTS[Math.floor((td-new Date(td.getFullYear(),0,1))/86400000)%ASPECTS.length];
-  const elMatch=bSign.el===tSun.el?85:bSign.el===mSign.el?75:55;
+  // 牡牛座(土)×月乙女座(土)×ASC山羊座(土) → 土のグランドトライン
+  const elMatch = tSun.el==="土" ? 90 : tSun.el==="水" ? 75 : tSun.el==="火" ? 55 : 60;
   const aBonus=aspect.type==="調和"?15:aspect.type==="強調"?10:aspect.type==="緊張"?-10:0;
   const horoScore=Math.min(100,elMatch+aBonus);
 
+  // 算命学（星は確定値、エネルギー位相は動的）
   const dayIdx=Math.floor((td-new Date(td.getFullYear(),0,1))/86400000)%10;
   const sanmeiScore=ENERGY_SCORES[dayIdx];
   const sanmeiEnergy=ENERGY_NAMES[dayIdx];
-  const sanmeiStar=SANMEI_STARS[(BIRTH.year-4)%10];
-  const sanmeiYojin=SANMEI_YOJIN[(BIRTH.year-4)%12];
 
-  const overall=Math.round(kyuseiScore*.2+fort.score*.25+mayaScore*.2+horoScore*.2+sanmeiScore*.15);
+  const overall=Math.round(kyuseiScore*.2+shichuScore*.25+mayaScore*.2+horoScore*.2+sanmeiScore*.15);
   return {
     kyusei:{score:kyuseiScore,honmei,dk,good,bad},
-    shichu:{score:fort.score,fort,dsb,bsb,msb:monthSB(BIRTH.year,BIRTH.month),hsb:hourSB(BIRTH.hour)},
-    maya:{score:mayaScore,bMaya,tMaya},
-    horo:{score:horoScore,bSign,tSun,mSign,aspect,asc:ascendant(BIRTH.month,BIRTH.day,BIRTH.hour,BIRTH.minute)},
-    sanmei:{score:sanmeiScore,energy:sanmeiEnergy,star:sanmeiStar,yojin:sanmeiYojin},
+    shichu:{score:shichuScore,fort,dsb},
+    maya:{score:mayaScore,tMaya},
+    horo:{score:horoScore,tSun,aspect},
+    sanmei:{score:sanmeiScore,energy:sanmeiEnergy},
     overall
   };
 }
@@ -355,71 +417,74 @@ function render(d){
   const kyuseiRel=data.kyusei.good?"▲ 相生（吉）":data.kyusei.bad?"▽ 相剋（要注意）":"― 中吉";
   const kyuseiNote=data.kyusei.score>=70?"今日は九星の流れがあなたに味方。北か東への移動が吉。":data.kyusei.score<=40?"静守の日。南西方向への大きな動きは避けて。":"中立的なエネルギー。日常の流れに逆らわず進んで。";
   const k=secCard("九星気学","☯",COLS.a1,data.kyusei.score,`
-    ${infoRow("本命星",`${data.kyusei.honmei} ${KYUSEI_NAMES[data.kyusei.honmei]}`,`元素：${KYUSEI_EL[data.kyusei.honmei]}`)}
+    ${infoRow("本命星",`${HONMEI_FIXED} ${KYUSEI_NAMES[HONMEI_FIXED]}`,`元素：${KYUSEI_EL[HONMEI_FIXED]}`)}
     ${infoRow("今日の日盤",`${data.kyusei.dk} ${KYUSEI_NAMES[data.kyusei.dk]}`)}
     ${infoRow("相性",kyuseiRel)}
     <div class="sec-note">${kyuseiNote}</div>
   `);
 
   // 四柱
-  const cols=[
-    {lbl:"年柱",...data.shichu.bsb},
-    {lbl:"月柱",...data.shichu.msb},
-    {lbl:"日柱",...daySB(new Date(1980,3,26))},
-    {lbl:"時柱",...data.shichu.hsb},
+  const fixedCols=[
+    {lbl:"年柱", stem:SHICHU_FIXED.nen.stem,   branch:SHICHU_FIXED.nen.branch},
+    {lbl:"月柱", stem:SHICHU_FIXED.tsuki.stem,  branch:SHICHU_FIXED.tsuki.branch},
+    {lbl:"日柱", stem:SHICHU_FIXED.hi.stem,     branch:SHICHU_FIXED.hi.branch},
+    {lbl:"時柱", stem:SHICHU_FIXED.toki.stem,   branch:SHICHU_FIXED.toki.branch},
   ];
-  const shichuCols=cols.map(c=>`<div class="shichu-col">
+  const shichuCols=fixedCols.map(c=>`<div class="shichu-col">
     <div class="shichu-col-lbl">${c.lbl}</div>
     <div class="shichu-stem" style="color:${COLS.a2}">${c.stem}</div>
     <div class="shichu-branch">${c.branch}</div>
   </div>`).join('');
-  const shichuNote=data.shichu.score>=80?`「${data.shichu.fort.name}」の日。命式の木の気が活発。創造と前進の好機。`:data.shichu.score<=30?`「${data.shichu.fort.name}」の日。エネルギーを外に出さず内なる充電を。`:`「${data.shichu.fort.name}」の日。バランスを保ちながら着実に積み重ねて。`;
+  const shichuNote=data.shichu.score>=80?`「${data.shichu.fort.name}」の日。己土の日干が活きる。誠実さと堅実さで前進を。`:data.shichu.score<=30?`「${data.shichu.fort.name}」の日。エネルギーを外に出さず内なる充電を。`:`「${data.shichu.fort.name}」の日。バランスを保ちながら着実に積み重ねて。`;
   const s=secCard("四柱推命","🀄",COLS.a2,data.shichu.score,`
     <div class="shichu-cols">${shichuCols}</div>
     ${infoRow("今日の干支",`${data.shichu.dsb.stem}${data.shichu.dsb.branch}`)}
-    ${infoRow("十二運",data.shichu.fort.name)}
+    ${infoRow("十二運（日干己基準）",data.shichu.fort.name)}
     <div class="sec-note">${shichuNote}</div>
   `);
 
   // マヤ
-  const mayaNote=data.maya.score>=80?"誕生KINと今日のKINが共鳴。宇宙のリズムがあなたの波長と合っている日。":data.maya.score>=60?"今日の紋章のエネルギーを意識して行動すると流れに乗れる。":"異なる周波数の日。今日の紋章から学ぶ視点で過ごして。";
+  const mayaNote=data.maya.score>=85?"誕生KINと今日のKINが強く共鳴。黄色い星のエネルギーが増幅されている。":data.maya.score>=70?"誕生KINとの共鳴あり。音1の「磁気」の流れを意識して行動を。":"異なる周波数の日。今日のKINの紋章から新しい視点を受け取って。";
   const m=secCard("マヤ暦","🌀",COLS.a3,data.maya.score,`
     <div class="maya-boxes">
       <div class="maya-box">
         <div class="maya-box-lbl">誕生KIN</div>
-        <div class="maya-kin" style="color:${COLS.a3}">${data.maya.bMaya.kin}</div>
-        <div class="maya-sign">${data.maya.bMaya.tone} ${data.maya.bMaya.signName}</div>
+        <div class="maya-kin" style="color:${COLS.a3}">${MAYA_BIRTH_FIXED.kin}</div>
+        <div class="maya-sign">音${MAYA_BIRTH_FIXED.tone} ${MAYA_BIRTH_FIXED.signName}</div>
       </div>
       <div class="maya-box">
         <div class="maya-box-lbl">今日のKIN</div>
         <div class="maya-kin" style="color:${COLS.a3}">${data.maya.tMaya.kin}</div>
-        <div class="maya-sign">${data.maya.tMaya.tone} ${data.maya.tMaya.signName}</div>
+        <div class="maya-sign">音${data.maya.tMaya.tone} ${data.maya.tMaya.signName}</div>
       </div>
     </div>
     ${infoRow("今日の紋章の意味",data.maya.tMaya.meaning)}
     ${infoRow("ハアブ暦",`${data.maya.tMaya.haabMonth} ${data.maya.tMaya.haabDay}`)}
+    ${infoRow("潜在意識（誕生）",MAYA_BIRTH_FIXED.latent)}
     <div class="sec-note">${mayaNote}</div>
   `);
 
-  // ホロスコープ
-  const horoNote=data.horo.score>=80?`太陽が${data.horo.tSun.name}を通過中。牡牛座の土の気と調和し、安定の中に豊かさが流れ込む。`:data.horo.score>=55?`${data.horo.aspect.name}のエネルギーが働いている。${data.horo.aspect.desc}を意識して。`:"今日は天体の緊張角。感情と理性のバランスを取ることで成長できる日。";
+  // ホロスコープ（確定値を表示）
+  const horoNote=data.horo.score>=85?`太陽が${data.horo.tSun.name}を通過中。牡牛座・乙女座・山羊座の土のグランドトラインが活性化。`:data.horo.score>=60?`${data.horo.aspect.name}のエネルギーが働いている。${data.horo.aspect.desc}を意識して。`:"今日は天体の緊張角。感情と理性のバランスを取ることで成長できる日。";
   const h=secCard("西洋占星術","♃",COLS.a4,data.horo.score,`
     <div class="pillbox">
-      ${pill(`☉ ${data.horo.bSign.name}`,COLS.a4)}
-      ${pill(`ASC ${data.horo.asc}`,COLS.a4)}
-      ${pill(`月 ${data.horo.mSign.name}`,COLS.a3)}
+      ${pill(`☉ ${HORO_FIXED.sun.name} ${HORO_FIXED.sun.deg}`,COLS.a4)}
+      ${pill(`ASC ${HORO_FIXED.asc.name} ${HORO_FIXED.asc.deg}`,COLS.a4)}
+      ${pill(`☽ ${HORO_FIXED.moon.name} ${HORO_FIXED.moon.deg}`,COLS.a3)}
+      ${pill(`MC ${HORO_FIXED.mc.name} ${HORO_FIXED.mc.deg}`,COLS.a4)}
     </div>
     ${infoRow("太陽トランジット",`${data.horo.tSun.name}（${data.horo.tSun.el}）`)}
     ${infoRow("本日のアスペクト",data.horo.aspect.name,`${data.horo.aspect.type}・${data.horo.aspect.desc}`)}
-    ${infoRow("エレメント",data.horo.bSign.el===data.horo.tSun.el?"同元素・共鳴":"異元素・刺激")}
+    ${infoRow("土のグランドトライン","牡牛☉・乙女☽・山羊ASC")}
     <div class="sec-note">${horoNote}</div>
   `);
 
-  // 算命学
-  const sanNote=data.sanmei.score>=80?`今日は「${data.sanmei.energy}」の位相。陽のエネルギーが高まり、社会的な活躍の機会が開く。`:data.sanmei.score>=55?`「${data.sanmei.energy}」の流れ。内なる本質を表現することで力が増す。`:`「${data.sanmei.energy}」の時期。焦らず、天命の方向性に委ねて。`;
+  // 算命学（確定値の星を表示）
+  const sanNote=data.sanmei.score>=80?`今日は「${data.sanmei.energy}」の位相。調舒星の芸術・感性のエネルギーが高まり、創造的な活躍の機会が開く。`:data.sanmei.score>=55?`「${data.sanmei.energy}」の流れ。調舒星の繊細な感性を表現することで力が増す。`:`「${data.sanmei.energy}」の時期。調舒星は内なる世界を深める時。焦らず天命に委ねて。`;
   const an=secCard("算命学","☵",COLS.a5,data.sanmei.score,`
-    ${infoRow("主星",data.sanmei.star,`守護元素：${STEM_EL[(BIRTH.year-4)%10]}`)}
-    ${infoRow("陽占守護神",data.sanmei.yojin)}
+    ${infoRow("日干の主星",SANMEI_FIXED.main,`己土・感性・芸術・繊細`)}
+    ${infoRow("守護神",SANMEI_FIXED.yojin)}
+    ${infoRow("命式の主な星","調舒星・石門星・車騎星・禄存星")}
     ${infoRow("今日のエネルギー位相",`${data.sanmei.energy}（${data.sanmei.score}%）`)}
     <div class="sec-note">${sanNote}</div>
   `);
